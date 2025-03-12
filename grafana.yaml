@@ -1,0 +1,10 @@
+# Playbook: grafana.yaml
+
+---
+- hosts: monitoring
+  user: root
+  vars:
+    host_arch: arm64
+    action: uninstall
+  roles:
+    - grafana

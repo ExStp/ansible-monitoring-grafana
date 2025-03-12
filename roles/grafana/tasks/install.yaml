@@ -1,0 +1,73 @@
+# Role: roles/grafana/tasks/install.yaml
+
+- name: Install required packets
+  package:
+    name:
+      - adduser
+      - libfontconfig1
+      - musl
+    update_cache: true
+
+- name: Install grafana
+  apt:
+    deb: "{{ grafana_download_url }}"
+
+- name: Start grafana service
+  systemd_service:
+    name: grafana-server
+    state: started
+    enabled: true
+    daemon_reload: true
+
+
+- name: Wait for grafana-server to start listening on port 3000
+  wait_for:
+    port: "3000"
+    state: started
+    timeout: 30
+
+- name: Create symbolic link for grafana service
+  file:
+    src: "/usr/share/grafana/bin/grafana"
+    dest: "/usr/local/bin/grafana"
+    owner: root
+    group: root
+    mode: "755"
+    state: link
+
+- name: Set grafana admin password
+  shell:
+    cmd: "grafana-cli admin reset-admin-password {{ grafana_admin_password }}"
+
+- name: Add Prometheus as a Grafana data source
+  community.grafana.grafana_datasource:
+    name: "Prometheus"
+    grafana_url: "http://localhost:3000"
+    grafana_user: "admin"
+    grafana_password: "{{ grafana_admin_password }}"
+    ds_type: "prometheus"
+    ds_url: "http://{{ prometheus_host }}:9090"
+    access: "proxy"
+    is_default: true
+
+- name: Install node exporter dashboard
+  get_url:
+    url: https://raw.githubusercontent.com/rfrail3/grafana-dashboards/master/prometheus/node-exporter-full.json
+    dest: /var/lib/grafana/node-exporter.json
+    mode: 0755
+
+- name: Activate dashboard for node exporter
+  template:
+    src: dashboard-node-exporter.yml.j2
+    dest: /etc/grafana/provisioning/dashboards/dashboard-node-exporter.yml
+    mode: 0755
+
+- name: Restart grafana service
+  service:
+    name: grafana-server
+    state: restarted
+    enabled: true
+
+- name: Confirm grafana-server installation
+  debug:
+    msg: "grafana-server is successfully installed"

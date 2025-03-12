@@ -1,0 +1,58 @@
+# roles/node-exporter/tasks/install.yaml
+
+- name: Gather service facts
+  service_facts:
+
+- name: Download node_exporter file and unarchieve
+  unarchive:
+    src: "{{ node_exporter_download_url }}"
+    dest: /tmp/
+    remote_src: true
+
+- name: Copy node_exporter binary to usr/local/bin
+  copy:
+    src: "/tmp/{{ node_exporter_full_name }}/node_exporter"
+    dest: /usr/local/bin
+    owner: root
+    group: root
+    mode: "755"
+    remote_src: true
+
+- name: Delete installation node_exporter dir
+  file:
+    path: /tmp/{{ node_exporter_full_name }}
+    state: absent
+
+- name: Create node_exporter user
+  user:
+    name: "{{ node_exporter_user }}"
+    shell: /bin/false
+    system: true
+
+- name: Place node_exporter systemd service file
+  template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+    owner: root
+    group: root
+    mode: "777"
+
+- name: Reload systemd to pick up the new service
+  systemd:
+    daemon_reload: true
+
+- name: Enable node_exporter service
+  systemd:
+    name: node_exporter
+    enabled: true
+    state: started
+
+- name: Wait until port (:{{ node_exporter_port }}) is listening
+  wait_for:
+    port: "{{ node_exporter_port }}"
+    state: started
+    timeout: 30
+
+- name: Debug message
+  debug:
+    msg: "node_exporter is successfully installed"

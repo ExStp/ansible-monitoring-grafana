@@ -1,0 +1,9 @@
+# Playbook: node_exporter.yaml
+
+---
+- hosts: all
+  user: root
+  vars:
+    host_arch: arm64
+  roles:
+    - node-exporter

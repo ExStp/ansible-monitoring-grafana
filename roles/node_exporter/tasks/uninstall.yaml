@@ -1,0 +1,41 @@
+# roles/node-exporter/tasks/uninstall.yaml
+
+- name: Gather service facts
+  service_facts:
+
+- name: Stop and disable node_exporter service
+  service:
+    name: node_exporter.service
+    state: stopped
+    enabled: false
+  when: "'node_exporter.service' in ansible_facts.services"
+
+- name: Remove Node Exporter systemd service file
+  file:
+    path: /etc/systemd/system/node_exporter.service
+    state: absent
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: true
+
+- name: Remove node_exporter binary
+  file:
+    path: /usr/local/bin/node_exporter
+    state: absent
+
+- name: Delete node_exporter user and his directory
+  user:
+    name: "{{ node_exporter_user }}"
+    state: absent
+    remove: yes
+
+- name: Ensure Node Exporter port ({{ node_exporter_port }}) is not listening
+  wait_for:
+    port: "{{ node_exporter_port }}"
+    state: stopped
+    timeout: 30
+
+- name: Confirm Node Exporter uninstallation
+  debug:
+    msg: "node_exporter is successfully uninstalled"

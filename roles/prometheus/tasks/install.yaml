@@ -1,0 +1,74 @@
+# roles/prometheus/tasks/install.yaml
+
+- name: Create promethes user
+  user:
+    name: "{{ prometheus_user }}"
+    shell: /bin/false
+    system: true
+
+- name: Create directories for Prometheus
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: "755"
+    owner: "{{ prometheus_user }}"
+    group: "{{ prometheus_user }}"
+  loop:
+    - /etc/prometheus
+    - /var/lib/prometheus
+
+- name: Download and extract Prometheus archive
+  unarchive:
+    src: "{{ prometheus_download_url }}"
+    dest: "/tmp"
+    remote_src: true
+
+- name: Copy Prometheus binaries to /usr/local/bin
+  copy:
+    src: "/tmp/{{ prometheus_full_name }}/{{ item }}"
+    dest: "/usr/local/bin"
+    owner: root
+    group: root
+    mode: "755"
+    remote_src: true
+  loop:
+    - "promtool"
+    - "prometheus"
+
+- name: Clean up extracted installation files
+  file:
+    path: "/tmp/{{ prometheus_full_name }}"
+    state: absent
+
+- name: Deploy Prometheus configuration
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+    mode: "644"
+
+- name: Place prometheus.service in systemd files
+  template:
+    src: prometheus.service.j2
+    dest: /etc/systemd/system/prometheus.service
+    owner: root
+    group: root
+    mode: "777"
+
+- name: Ensure Prometheus service is enabled and started
+  systemd_service:
+    name: prometheus
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Wait for Prometheus to start listening on port {{ prometheus_port }}
+  wait_for:
+    port: "{{ prometheus_port }}"
+    state: started
+    timeout: 30
+
+- name: Confirm Prometheus installation
+  debug:
+    msg: "Prometheus is successfully installed"

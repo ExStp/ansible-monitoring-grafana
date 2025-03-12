@@ -1,0 +1,47 @@
+# Role: roles/grafana/tasks/uninstall.yaml
+
+- name: Gather service facts
+  service_facts:
+
+- name: Stop grafana-server
+  service:
+    name: grafana-server
+    state: stopped
+    enabled: false
+  when: "'grafana-server.service' in ansible_facts.services"
+
+- name: Remove Grafana and its associated packages
+  apt:
+    name: grafana
+    state: absent
+    purge: true
+  
+- name: Delete remaining files and directories
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/var/lib/grafana"
+    - "/etc/grafana"
+    - "/var/log/grafana"
+
+- name: Delete grafana user and group
+  user:
+    name: grafana
+    state: absent
+    remove: true
+
+- name: Delete grafana service symlink
+  file:
+    path: /usr/local/bin/grafana
+    state: absent
+
+- name: Wait for grafana-server to stop listening on port 3000
+  wait_for:
+    port: "3000"
+    state: stopped
+    timeout: 30
+
+- name: Confirm grafana-server uninstallation
+  debug:
+    msg: "grafana-server is successfully uninstalled"

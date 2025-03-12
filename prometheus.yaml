@@ -1,0 +1,9 @@
+# Playbook: prometheus.yaml
+
+---
+- hosts: monitoring
+  user: root
+  vars:
+    host_arch: arm64
+  roles:
+    - prometheus

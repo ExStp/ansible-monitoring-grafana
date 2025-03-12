@@ -1,0 +1,17 @@
+# roles/node-exporter/tasks/main.yaml
+
+- name: Check if action is valid
+  fail:
+    msg: "Invalid action: {{ action }}. Valid values must be 'install' or 'uninstall'."
+  when: action not in ['install', 'uninstall']
+
+- name: Test connection
+  ping:
+
+- name: Include tasks for installation
+  include_tasks: install.yaml
+  when: action == "install"
+
+- name: Include tasks for uninstallation
+  include_tasks: uninstall.yaml
+  when: action == "uninstall"

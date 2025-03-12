@@ -1,0 +1,46 @@
+- name: Gather service facts
+  service_facts:
+
+- name: Stop Prometheus service if running
+  systemd:
+    name: prometheus
+    state: stopped
+    enabled: false
+  when: "'prometheus.service' in ansible_facts.services"
+
+- name: Remove Prometheus systemd unit file
+  file:
+    path: "/etc/systemd/system/prometheus.service"
+    state: absent
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: true
+
+- name: Remove Prometheus binary files and configuration
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/usr/local/bin/promtool"
+    - "/usr/local/bin/prometheus"
+    - "/etc/prometheus"
+    - "/var/lib/prometheus"
+    - "/var/log/prometheus"
+
+- name: Remove Prometheus user if exists
+  user:
+    name: "{{ prometheus_user }}"
+    state: absent
+    remove: true
+  when: prometheus_user is defined
+
+- name: Ensure Prometheus port is closed
+  wait_for:
+    port: "{{ prometheus_port }}"
+    state: stopped
+    timeout: 30
+
+- name: Debug message
+  debug:
+    msg: "Prometheus has been successfully uninstalled"

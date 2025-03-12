@@ -1,0 +1,10 @@
+# roles/prometheus/defaults/main.yaml
+
+node_exporter_port: 9100
+prometheus_user: prometheus
+prometheus_version: 3.2.1
+host_arch: amd64
+prometheus_port: 9090
+prometheus_address: 0.0.0.0
+prometheus_full_name: "prometheus-{{ prometheus_version }}.linux-{{ host_arch }}"
+prometheus_download_url: https://github.com/prometheus/prometheus/releases/download/v{{ prometheus_version }}/{{ prometheus_full_name }}.tar.gz
