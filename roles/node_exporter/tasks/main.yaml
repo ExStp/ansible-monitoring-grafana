@@ -1,17 +1,42 @@
 # roles/node-exporter/tasks/main.yaml
 
+- name: Test connection
+  ping:
+
 - name: Check if action is valid
   fail:
     msg: "Invalid action: {{ action }}. Valid values must be 'install' or 'uninstall'."
   when: action not in ['install', 'uninstall']
 
-- name: Test connection
-  ping:
+- name: Detect OS type
+  set_fact:
+    is_windows: "{{ ansible_os_family | lower == 'windows' }}"
+    is_linux: "{{ ansible_os_family | lower in ['debian', 'redhat', 'ubuntu', 'linux'] }}"
 
-- name: Include tasks for installation
-  include_tasks: install.yaml
-  when: action == "install"
+# Условие для установки на Linux
+- name: Include Linux installation tasks
+  include_tasks: install_linux.yaml
+  when:
+    - action == "install"
+    - is_linux
 
-- name: Include tasks for uninstallation
-  include_tasks: uninstall.yaml
-  when: action == "uninstall"
+# Условие для установки на Windows
+- name: Include Windows installation tasks
+  include_tasks: install_windows.yaml
+  when:
+    - action == "install"
+    - is_windows
+
+# Условие для удаления на Linux
+- name: Include Linux uninstallation tasks
+  include_tasks: uninstall_linux.yaml
+  when:
+    - action == "uninstall"
+    - is_linux
+
+# Условие для удаления на Windows
+- name: Include Windows uninstallation tasks
+  include_tasks: uninstall_windows.yaml
+  when:
+    - action == "uninstall"
+    - is_windows

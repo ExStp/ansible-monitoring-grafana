@@ -4,6 +4,6 @@
 - hosts: all
   user: root
   vars:
-    host_arch: arm64
+    action: install
   roles:
-    - node-exporter
+    - node_exporter

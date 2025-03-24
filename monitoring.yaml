@@ -5,8 +5,7 @@
   hosts: all
   remote_user: root
   vars:
-    host_arch: arm64
-    action: uninstall
+    action: install
   roles:
     - node_exporter
 
@@ -14,8 +13,7 @@
   hosts: monitoring 
   remote_user: root
   vars:
-    host_arch: arm64
-    action: uninstall
+    action: install
   roles:
     - prometheus
     - grafana

@@ -1,0 +1,20 @@
+# roles/node_exporter/tasks/install_windows.yaml
+
+- name: Download windows_exporter MSI
+  win_get_url:
+    url: "{{ windows_exporter_download_url }}"
+    dest: "C:\\Temp\\{{ windows_exporter_full_name }}"
+    force: yes
+
+- name: Install windows_exporter
+  win_package:
+    path: "C:\\Temp\\{{ windows_exporter_full_name }}"
+    state: present
+    arguments: "/quiet"
+  register: install_result
+
+- name: Ensure windows_exporter service is running
+  win_service:
+    name: windows_exporter
+    state: started
+    start_mode: auto
