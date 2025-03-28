@@ -1,6 +1,7 @@
 # roles/node-exporter/defaults/main.yaml
 
 host_arch: amd64
+action: install
 
 node_exporter_user: node_exporter
 node_exporter_version: 1.9.0
@@ -13,3 +14,4 @@ windows_exporter_version: 0.30.5
 windows_exporter_full_name: windows_exporter-{{ windows_exporter_version }}-{{ host_arch }}
 windows_exporter_port: 9100
 windows_exporter_download_url: "https://github.com/prometheus-community/windows_exporter/releases/download/v{{ windows_exporter_version }}/{{ windows_exporter_full_name }}.msi"
+windows_exporter_dest: "C:\\Users\\ansible\\{{ windows_exporter_full_name }}.msi"

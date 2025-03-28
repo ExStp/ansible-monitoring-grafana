@@ -3,17 +3,11 @@
 ---
 - name: Deploy Node Exporter
   hosts: all
-  remote_user: root
-  vars:
-    action: install
   roles:
     - node_exporter
 
 - name: Deploy monitoring services
   hosts: monitoring 
-  remote_user: root
-  vars:
-    action: install
   roles:
     - prometheus
     - grafana

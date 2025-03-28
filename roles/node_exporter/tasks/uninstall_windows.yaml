@@ -1,1 +1,11 @@
 # roles/node_exporter/tasks/uninstall_windows.yaml
+
+- name: Uninstall windows_exporter via MSI
+  win_command: msiexec /x {31C973F5-7A61-40B7-B6BC-A099489D7645} /quiet /norestart
+  ignore_errors: yes
+
+- name: Remove any remaining files from the program directory
+  win_file:
+    path: "C:\\Program Files\\windows_exporter"
+    state: absent
+  ignore_errors: yes

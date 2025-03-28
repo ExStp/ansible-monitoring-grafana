@@ -1,8 +1,5 @@
 # roles/node-exporter/tasks/main.yaml
 
-- name: Test connection
-  ping:
-
 - name: Check if action is valid
   fail:
     msg: "Invalid action: {{ action }}. Valid values must be 'install' or 'uninstall'."

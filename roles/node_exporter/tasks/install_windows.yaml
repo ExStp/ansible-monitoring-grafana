@@ -3,18 +3,22 @@
 - name: Download windows_exporter MSI
   win_get_url:
     url: "{{ windows_exporter_download_url }}"
-    dest: "C:\\Temp\\{{ windows_exporter_full_name }}"
+    dest: "{{ windows_exporter_dest }}"
     force: yes
 
-- name: Install windows_exporter
-  win_package:
-    path: "C:\\Temp\\{{ windows_exporter_full_name }}"
-    state: present
-    arguments: "/quiet"
+- name: Install windows_exporter with custom parameters
+  win_shell: msiexec.exe /passive /i "{{ windows_exporter_dest }}" LISTEN_PORT={{ windows_exporter_port }}
   register: install_result
+  ignore_errors:
 
 - name: Ensure windows_exporter service is running
   win_service:
     name: windows_exporter
     state: started
     start_mode: auto
+
+- name: Remove the downloaded MSI file after installation
+  win_file:
+    path: "{{ windows_exporter_dest }}"
+    state: absent
+  when: install_result.rc == 0
