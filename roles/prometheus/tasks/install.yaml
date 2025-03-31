@@ -57,7 +57,7 @@
     mode: "777"
 
 - name: Ensure Prometheus service is enabled and started
-  systemd_service:
+  service:
     name: prometheus
     state: started
     enabled: true

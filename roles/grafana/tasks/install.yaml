@@ -13,7 +13,7 @@
     deb: "{{ grafana_download_url }}"
 
 - name: Start grafana service
-  systemd_service:
+  service:
     name: grafana-server
     state: started
     enabled: true
@@ -24,7 +24,7 @@
   wait_for:
     port: "3000"
     state: started
-    timeout: 30
+    timeout: 240
 
 - name: Create symbolic link for grafana service
   file:

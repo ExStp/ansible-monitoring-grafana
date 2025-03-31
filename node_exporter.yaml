@@ -1,8 +1,7 @@
 # Playbook: node_exporter.yaml
 
 ---
-- hosts: all
-  user: root
+- hosts: targets
   vars:
     action: install
   roles:
